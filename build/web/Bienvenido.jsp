@@ -17,7 +17,7 @@
         
         <p class="text-secondary">Nos alegra tenerte de vuela...</p>
         
-        <a href="Formulario.jsp" class="btn btn-success mb-3">Salir</a>
+        <a href="Login.jsp" class="btn btn-success mb-3">Salir</a>
         
     </body>
 </html>

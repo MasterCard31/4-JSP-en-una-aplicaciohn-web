@@ -11,10 +11,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.RequestDispatcher;
 
 /**
@@ -25,7 +24,16 @@ import javax.servlet.RequestDispatcher;
 public class AlmacenarDatosServlet extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws ServletException, IOException, ClassNotFoundException, SQLException {
+
+        //Establecer la conexión a la base de datos
+        String jdbcUrl = "jdbc:mysql://localhost:3306/formulariocontacto";
+        String usuario = "root";
+        String clave = "tecsup";
+        Connection conexion = null;
+
+        Class.forName("com.mysql.jdbc.Driver");
+        conexion = DriverManager.getConnection(jdbcUrl, usuario, clave);
 
         //Obtener los datos del formulario
         String nombre = request.getParameter("nombre");
@@ -45,6 +53,15 @@ public class AlmacenarDatosServlet extends HttpServlet {
         String errorCorreo = "";
         String errorContrasenha = "";
 
+        // Construir la consulta SQL
+        String sql = "SELECT COUNT(*) AS count FROM users WHERE correo = ?";
+        // Preparar la consulta
+        PreparedStatement stmt = conexion.prepareStatement(sql);
+        stmt.setString(1, correo);
+
+        // Ejecutar la consulta
+        ResultSet rs = stmt.executeQuery();
+
         //Validar la cantidad de números que pueda tener la contraseña
         int count = 0;
         for (int i = 0; i < contrasenha.length(); i++) {
@@ -62,18 +79,16 @@ public class AlmacenarDatosServlet extends HttpServlet {
             errorNombre = "El campo nombre solo puede contener letras.";
         } else if (!nombre.matches("^[A-Z][a-zA-Z0-9]*$")) {
             errorNombre = "El campo nombre debe iniciar con una mayúscula.";
-        }
-
-        //Campo DNI
+            
+        } //Campo DNI
         else if (dni == null || dni.isEmpty()) {
             errorDni = "El campo DNI es obligatorio.";
         } else if (dni.length() != 8) {
             errorDni = "El campo DNI debe tener 8 caracteres.";
         } else if (!dni.matches("\\d{8}")) {
             errorDni = "El campo DNI no tiene el formato correcto.";
-        }
-
-        //Campo Celular
+            
+        } //Campo Celular
         else if (celular == null || celular.isEmpty()) {
             errorCelular = "El campo celular es obligatorio.";
         } else if (celular.length() != 9) {
@@ -88,9 +103,13 @@ public class AlmacenarDatosServlet extends HttpServlet {
             errorCorreo = "El campo correo excede la longitud permitida.";
         } else if (!correo.matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
             errorCorreo = "El campo correo no tiene un formato válido de correo electrónico.";
-        }
-
-        //Campo Contraseña
+        } else if (rs.next()) {
+            int veces = rs.getInt("count");
+            if (veces > 0) {
+                errorCorreo = "Este correo electrónico ya se encuentra registrado."; 
+            }
+            
+        } //Campo Contraseña
         else if (contrasenha == null || contrasenha.isEmpty()) {
             errorContrasenha = "El campo contraseña es obligatorio.";
         } else if (contrasenha.length() < 8 || contrasenha.length() > 50) {
@@ -114,15 +133,7 @@ public class AlmacenarDatosServlet extends HttpServlet {
         } else {
             // Si no hay errores, guardar los datos en la base de datos
 
-            //Establecer la conexión a la base de datos
-            String jdbcUrl = "jdbc:mysql://localhost:3306/formulariocontacto";
-            String usuario = "root";
-            String clave = "tecsup";
-            Connection conexion = null;
             try {
-                Class.forName("com.mysql.jdbc.Driver");
-                conexion = DriverManager.getConnection(jdbcUrl, usuario, clave);
-
                 //Crear la consulta SQL y ejecutarla
                 String consulta = "INSERT INTO users (nombre, dni, celular, correo, contrasenha) VALUES (?, ?, ?, ?, ?)";
                 try (PreparedStatement ps = conexion.prepareStatement(consulta)) {
@@ -134,7 +145,7 @@ public class AlmacenarDatosServlet extends HttpServlet {
 
                     ps.executeUpdate();
                 }
-            } catch (ClassNotFoundException | SQLException e) {
+            } catch (SQLException e) {
             } finally {
                 try {
                     if (conexion != null) {
@@ -160,7 +171,11 @@ public class AlmacenarDatosServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        try {
+            processRequest(request, response);
+        } catch (ClassNotFoundException | SQLException ex) {
+            Logger.getLogger(AlmacenarDatosServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
@@ -174,7 +189,11 @@ public class AlmacenarDatosServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        try {
+            processRequest(request, response);
+        } catch (ClassNotFoundException | SQLException ex) {
+            Logger.getLogger(AlmacenarDatosServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**

@@ -4,13 +4,19 @@
  */
 package com.tecsup.formulario;
 
-import java.io.IOException;
-import java.io.PrintWriter;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import javax.servlet.http.HttpSession;
 
 /**
  *
@@ -31,18 +37,38 @@ public class ValidarServlet extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet ValidarServlet</title>");            
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet ValidarServlet at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
+        // Obtener los valores de correo y contraseña desde el formulario de inicio de sesión
+        String correo = request.getParameter("correo");
+        String contrasenha = request.getParameter("contrasenha");
+        
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        
+                try {
+            // Conectar a la base de datos MySQL
+            Class.forName("com.mysql.jdbc.Driver");
+            conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/formulariocontacto", "root", "tecsup");
+
+            // Verificar el nombre de usuario y la contraseña en la tabla de usuarios
+            String sql = "SELECT * FROM users WHERE correo=? AND contrasenha=?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, correo);
+            stmt.setString(2, contrasenha);
+            rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                // Si los detalles son correctos, crear una sesión de usuario y redirigir a la página de inicio de sesión exitoso
+                HttpSession session = request.getSession();
+                session.setAttribute("correo", correo);
+                response.sendRedirect("Bienvenido.jsp");
+            } else {
+                // Si los detalles son incorrectos, enviar un mensaje de error y redirigir al usuario a la página de inicio de sesión
+                request.setAttribute("error", "Usuario o contraseña inválidos");
+                request.getRequestDispatcher("Login.jsp").forward(request, response);
+            }
+
+        } catch (ClassNotFoundException | SQLException e) {
         }
     }
 

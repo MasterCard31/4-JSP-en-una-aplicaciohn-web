@@ -16,7 +16,7 @@
         <form class="row g-3 m-3 " action="/FormularioContacto/ValidarServlet" method="POST">
             <h1 class="h1 mb-3"> Iniciar Sesión </h1>
             <div class="col-auto">
-                <label for="correo" class="visually-hidden">Nombre de usuario:</label>
+                <label for="correo" class="visually-hidden">Correo electrónico:</label>
                 <input type="text" name="correo" class="form-control" id="correo" placeholder="Correo Electrónico">
             </div>
             <div class="col-auto">

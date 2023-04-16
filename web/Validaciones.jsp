@@ -67,7 +67,7 @@
 
             //Campo Correo
             else if (correo == null || correo.isEmpty()) {
-                out.println("El campo correo nombre es obligatorio.");
+                out.println("El campo correo es obligatorio.");
                 
             }else if(correo.length() > 50){
                 out.println("el campo correo excede la longitud permitida.");
@@ -96,7 +96,7 @@
                 out.println("El campo contraseña debe tener al menos dos números.");
                 
             }else{
-                response.sendRedirect("/FormularioContacto/Bienvenido.jsp");
+                response.sendRedirect("/FormularioContacto/AlmacenarDatosServlet");
             }
         %>
     </body>

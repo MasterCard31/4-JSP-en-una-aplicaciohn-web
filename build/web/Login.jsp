@@ -17,11 +17,11 @@
             <h1 class="h1 mb-3"> Iniciar Sesión </h1>
             <div class="col-auto">
                 <label for="correo" class="visually-hidden">Correo electrónico:</label>
-                <input type="text" name="correo" class="form-control" id="correo" placeholder="Correo Electrónico">
+                <input type="text" name="correo" class="form-control" id="correo" placeholder="Correo Electrónico" requerid>
             </div>
             <div class="col-auto">
                 <label for="contrasenha" class="visually-hidden">Contraseña</label>
-                <input type="password" name="contrasenha" class="form-control" id="contrasenha" placeholder="Contraseña">
+                <input type="password" name="contrasenha" class="form-control" id="contrasenha" placeholder="Contraseña" required>
             </div>
             <div class="col-auto">
                 <button type="submit" class="btn btn-primary mb-3">Iniciar sesión</button>
